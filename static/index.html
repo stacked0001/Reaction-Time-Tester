@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reaction Time</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <h1>Reaction Time</h1>
+
+    <!-- Auth -->
+    <div id="auth">
+      <input id="username" type="text" placeholder="Username" autocomplete="off" />
+      <input id="password" type="password" placeholder="Password" />
+      <div class="btn-row">
+        <button id="btn-login">Login</button>
+        <button id="btn-register" class="secondary">Register</button>
+      </div>
+      <div id="error-msg"></div>
+    </div>
+
+    <!-- Game -->
+    <div id="game">
+      <div id="player-count">0 players connected</div>
+      <div id="status">Waiting for players...</div>
+      <div id="click-zone">wait...</div>
+      <div id="results-box"></div>
+      <div id="winner-label"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

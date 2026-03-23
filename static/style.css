@@ -1,0 +1,173 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #000;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#app {
+  text-align: center;
+  width: 100%;
+  max-width: 480px;
+  padding: 2rem;
+}
+
+h1 {
+  font-size: 1.4rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  color: #888;
+}
+
+/* Auth form */
+#auth input {
+  display: block;
+  width: 100%;
+  background: #111;
+  border: 1px solid #333;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+}
+
+#auth input:focus {
+  border-color: #fff;
+}
+
+.btn-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+button {
+  flex: 1;
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+button:hover {
+  background: #ccc;
+}
+
+button.secondary {
+  background: #111;
+  color: #fff;
+  border: 1px solid #333;
+}
+
+button.secondary:hover {
+  border-color: #fff;
+}
+
+#error-msg {
+  margin-top: 1rem;
+  color: #f55;
+  min-height: 1.2rem;
+  font-size: 0.9rem;
+}
+
+/* Game area */
+#game {
+  display: none;
+}
+
+#player-count {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 2rem;
+  letter-spacing: 0.1em;
+}
+
+#status {
+  font-size: 1.6rem;
+  letter-spacing: 0.15em;
+  margin-bottom: 2.5rem;
+  min-height: 2.5rem;
+}
+
+#click-zone {
+  width: 100%;
+  height: 180px;
+  border: 2px solid #222;
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: not-allowed;
+  font-size: 1rem;
+  color: #333;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  user-select: none;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+#click-zone.ready {
+  border-color: #fff;
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+  animation: pulse 0.3s ease-out;
+}
+
+#click-zone.disq {
+  border-color: #f55;
+  background: #200;
+  color: #f55;
+}
+
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+#results-box {
+  margin-top: 2rem;
+  text-align: left;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+#results-box .result-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #111;
+}
+
+#results-box .result-row.winner {
+  color: #fff;
+}
+
+#results-box .result-row.disq-row {
+  color: #555;
+  text-decoration: line-through;
+}
+
+#winner-label {
+  margin-top: 1rem;
+  font-size: 1rem;
+  color: #fff;
+  letter-spacing: 0.1em;
+}
