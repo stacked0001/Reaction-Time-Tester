@@ -7,6 +7,9 @@ import (
 )
 
 func main() {
+	// Load existing users from file (best-effort)
+	loadUsersFromFile()
+
 	// Initialize game state
 	initGame()
 

@@ -130,7 +130,7 @@ function handleMessage(msg) {
       clickZone.style.cursor = 'not-allowed';
 
       if (msg.payload === 'waiting') {
-        setStatus('Waiting for players...');
+        setStatus('No players connected.');
         setClickable(false);
         clickZone.textContent = 'wait...';
       } else if (msg.payload === 'pending') {
@@ -191,11 +191,12 @@ function showResults(data) {
     return `<div class="${cls}"><span>${r.username}</span><span>${time}</span></div>`;
   }).join('');
 
-  if (winner) {
+  if (winner && results.filter(r => !r.disqualified).length > 1) {
     winnerLabel.textContent = `Winner: ${winner}`;
-    setStatus('Round over!');
+  } else if (winner) {
+    winnerLabel.textContent = ``;
   } else {
-    winnerLabel.textContent = 'No winner this round.';
-    setStatus('Round over!');
+    winnerLabel.textContent = 'No valid result.';
   }
+  setStatus('Round over!');
 }

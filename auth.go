@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -17,39 +18,37 @@ type authRequest struct {
 	Password string `json:"password"`
 }
 
-// loadUsers reads username:hashed_password pairs from file.
-func loadUsers() (map[string]string, error) {
-	users := make(map[string]string)
+// In-memory user store — always works, even on ephemeral filesystems.
+var (
+	usersMu sync.RWMutex
+	users   = make(map[string]string) // username -> bcrypt hash
+)
 
+// loadUsersFromFile loads users.txt into memory at startup (best-effort).
+func loadUsersFromFile() {
 	f, err := os.Open(usersFile)
-	if os.IsNotExist(err) {
-		return users, nil
-	}
 	if err != nil {
-		return nil, err
+		return // file doesn't exist yet, that's fine
 	}
 	defer f.Close()
 
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
-		line := scanner.Text()
-		parts := strings.SplitN(line, ":", 2)
+		parts := strings.SplitN(scanner.Text(), ":", 2)
 		if len(parts) == 2 {
 			users[parts[0]] = parts[1]
 		}
 	}
-	return users, scanner.Err()
 }
 
-// saveUser appends a new username:hashed_password line to file.
-func saveUser(username, hashedPassword string) error {
+// saveUserToFile appends to users.txt as a best-effort backup.
+func saveUserToFile(username, hash string) {
 	f, err := os.OpenFile(usersFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return err
+		return // no persistent disk (e.g. Render free tier) — skip silently
 	}
 	defer f.Close()
-	_, err = f.WriteString(username + ":" + hashedPassword + "\n")
-	return err
+	f.WriteString(username + ":" + hash + "\n")
 }
 
 func handleRegister(w http.ResponseWriter, r *http.Request) {
@@ -64,16 +63,15 @@ func handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if strings.TrimSpace(req.Username) == "" || strings.TrimSpace(req.Password) == "" {
+	req.Username = strings.TrimSpace(req.Username)
+	req.Password = strings.TrimSpace(req.Password)
+	if req.Username == "" || req.Password == "" {
 		http.Error(w, "username and password required", http.StatusBadRequest)
 		return
 	}
 
-	users, err := loadUsers()
-	if err != nil {
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
+	usersMu.Lock()
+	defer usersMu.Unlock()
 
 	if _, exists := users[req.Username]; exists {
 		http.Error(w, "username already taken", http.StatusConflict)
@@ -86,10 +84,8 @@ func handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := saveUser(req.Username, string(hash)); err != nil {
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
+	users[req.Username] = string(hash)
+	saveUserToFile(req.Username, string(hash))
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"message": "registered"})
@@ -107,13 +103,10 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	users, err := loadUsers()
-	if err != nil {
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
-
+	usersMu.RLock()
 	hash, exists := users[req.Username]
+	usersMu.RUnlock()
+
 	if !exists {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return

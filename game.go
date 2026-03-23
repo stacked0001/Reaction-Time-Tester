@@ -13,7 +13,7 @@ import (
 
 // Game states
 const (
-	StateWaiting  = "waiting"  // fewer than 2 players
+	StateWaiting  = "waiting"  // no players
 	StatePending  = "pending"  // countdown before GO
 	StateActive   = "active"   // GO has been sent, waiting for clicks
 	StateResults  = "results"  // showing round results
@@ -94,8 +94,8 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%s disconnected (%d players)", username, count)
 		broadcast(Msg{Type: "players", Payload: count})
 
-		// If now fewer than 2, reset to waiting
-		if count < 2 && gameState != StateWaiting {
+		// If no players left, reset to waiting
+		if count < 1 && gameState != StateWaiting {
 			game.mu.Lock()
 			game.state = StateWaiting
 			game.mu.Unlock()
@@ -216,7 +216,7 @@ func resetAndStart() {
 		p.reactionMs = 0
 	}
 	count := len(game.players)
-	if count < 2 {
+	if count < 1 {
 		game.state = StateWaiting
 		game.mu.Unlock()
 		broadcast(Msg{Type: "state", Payload: StateWaiting})
@@ -236,7 +236,7 @@ func maybeStartRound() {
 	state := game.state
 	game.mu.Unlock()
 
-	if count >= 2 && state == StateWaiting {
+	if count >= 1 && state == StateWaiting {
 		game.mu.Lock()
 		game.state = StatePending
 		game.mu.Unlock()
